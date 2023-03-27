@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Alagamentos em São Paulo</title>
+    <meta charset="utf-8">
+    <style>
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var saoPaulo = { lat: -23.5505, lng: -46.6333 };
+      var markers = [];
+
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: saoPaulo
+        });
+        
+        var i;
+        var numMarkers = 5;
+        var bounds = new google.maps.LatLngBounds();
+        for (i = 0; i < numMarkers; i++) {
+          var marker = new google.maps.Marker({
+            position: randomPosition(),
+            map: map,
+          });
+          markers.push(marker);
+          bounds.extend(marker.getPosition());
+          
+          var geocoder = new google.maps.Geocoder();
+          var infowindow = new google.maps.InfoWindow();
+
+          google.maps.event.addListener(marker, 'click', function() {
+            geocodeLatLng(geocoder, map, infowindow, this.getPosition());
+          });
+
+          google.maps.event.addListener(marker, 'mouseover', function() {
+            infowindow.setContent(this.getTitle());
+            infowindow.open(map, this);
+          });
+          
+          google.maps.event.addListener(marker, 'mouseout', function() {
+            infowindow.close();
+          });
+        }
+        map.fitBounds(bounds);
+      }
+
+      function randomPosition() {
+        var lat = -23.5505 + (Math.random() - 0.5) * 0.2; // Random number between -0.1 and 0.1
+        var lng = -46.6333 + (Math.random() - 0.5) * 0.2; // Random number between -0.1 and 0.1
+        return { lat: lat, lng: lng };
+      }
+
+      function geocodeLatLng(geocoder, map, infowindow, latlng) {
+        geocoder.geocode({ 'location': latlng }, function(results, status) {
+          if (status === 'OK') {
+            if (results[0]) {
+              var address = results[0].formatted_address;
+              infowindow.setContent(address);
+              infowindow.open(map, marker);
+            } else {
+              window.alert('Endereço não encontrado');
+            }
+          } else {
+            window.alert('Erro ao buscar endereço: ' + status);
+          }
+        });
+      }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAl5isKQi1IuN5yoiYlntriTRWjoKkaOzk&callback=initMap"></script>
+  </body>
+</html>
